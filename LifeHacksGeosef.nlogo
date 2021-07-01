@@ -37,23 +37,6 @@ to cell-death
   set pcolor white
 end
 
-;to go
-;  ;; Normal to infect
-;  ask patches
-;    [ set normal-neighbors count neighbors with [living = 1]
-;      set infect-neighbors count neighbors with [living = 2] ]
-;
-;
-;  ask patches
-;    [ ifelse (normal-neighbors + infect-neighbors >= 6 or (infect-neighbors >= 2 and infect-neighbors <= 4)) and living = 1
-;      [ cell-infect ]
-;      [ ifelse infect-neighbors mod 2 = 1 and living = 2
-;        [ cell-death ]
-;        [ if normal-neighbors mod 2 = 0 and living = 3
-;          [ cell-normal ] ] ] ]
-;  tick
-;end
-
 to go
   ;; Normal to infect
   ask patches
@@ -64,12 +47,10 @@ to go
   ask patches
     [ ifelse (normal-neighbors + infect-neighbors >= 6 or (infect-neighbors >= 2 and infect-neighbors <= 4)) and living = 1
       [ cell-infect ]
-      [ ifelse infect-neighbors >= 5 and living = 2
+      [ ifelse infect-neighbors mod 2 = 1 and living = 2
         [ cell-death ]
-        [ ifelse infect-neighbors <= 2 and living = 2
-          [ cell-normal ]
-          [ if normal-neighbors >= 5 and living = 3
-            [ cell-normal ] ] ] ] ]
+        [ if normal-neighbors mod 2 = 0 and living = 3 and normal-neighbors != 0
+          [ cell-normal ] ] ] ]
   tick
 end
 
@@ -136,7 +117,7 @@ initial-density
 initial-density
 0.0
 100.0
-38.3
+34.7
 0.1
 1
 %
