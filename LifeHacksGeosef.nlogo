@@ -47,7 +47,7 @@ to go
   ask patches
     [ ifelse (normal-neighbors + infect-neighbors >= 6 or (infect-neighbors >= 2 and infect-neighbors <= 4)) and living = 1
       [ cell-infect ]
-      [ ifelse infect-neighbors mod 2 = 1 and living = 2
+      [ ifelse (infect-neighbors mod 2 = 1 or normal-neighbors + infect-neighbors = 0) and living = 2
         [ cell-death ]
         [ if normal-neighbors mod 2 = 0 and living = 3 and normal-neighbors != 0
           [ cell-normal ] ] ] ]
@@ -117,7 +117,7 @@ initial-density
 initial-density
 0.0
 100.0
-34.7
+19.1
 0.1
 1
 %
