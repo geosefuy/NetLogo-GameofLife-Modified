@@ -1,14 +1,13 @@
 patches-own [
-  living
-  live-neighbors  ;; counts how many neighboring cells are alive
-  normal-neighbors
-  infect-neighbors
+  status          ;; indicates the cell status
+  num-alive       ;; counts how many neighboring cells are alive
+  num-sick        ;; counts how many neighboring cells are sick
+  num-dead        ;; counts how many neighboring cells are dead
 ]
 
 to setup-blank
   clear-all
-  ask patches
-  [ cell-death ]
+  ask patches [ cell-dead ]
   reset-ticks
 end
 
@@ -16,89 +15,80 @@ to setup-random
   clear-all
   ask patches
     [ ifelse random-float 100.0 < initial-density
-      [ cell-normal ]
-      [ cell-death  ]
-  ]
+      [ cell-alive ]
+      [ cell-dead ] ]
   reset-ticks
 end
 
-to cell-normal
-  set living 1
+to cell-alive
+  set status 1
+  set pcolor green
+end
+
+to cell-sick
+  set status 2
   set pcolor yellow
 end
 
-to cell-infect
-  set living 2
-  set pcolor red
-end
-
-to cell-death
-  set living 3
+to cell-dead
+  set status 3
   set pcolor white
 end
 
-;to go
-;  ;; Normal to infect
-;  ask patches
-;    [ set normal-neighbors count neighbors with [living = 1]
-;      set infect-neighbors count neighbors with [living = 2] ]
-;
-;
-;  ask patches
-;    [ ifelse (normal-neighbors + infect-neighbors >= 6 or (infect-neighbors >= 2 and infect-neighbors <= 4)) and living = 1
-;      [ cell-infect ]
-;      [ ifelse infect-neighbors mod 2 = 1 and living = 2
-;        [ cell-death ]
-;        [ if normal-neighbors mod 2 = 0 and living = 3
-;          [ cell-normal ] ] ] ]
-;  tick
-;end
-
 to go
-  ;; Normal to infect
   ask patches
-    [ set normal-neighbors count neighbors with [living = 1]
-      set infect-neighbors count neighbors with [living = 2] ]
-
+    [ set num-alive count neighbors with [status = 1] ]
 
   ask patches
-    [ ifelse (normal-neighbors + infect-neighbors >= 6 or (infect-neighbors >= 2 and infect-neighbors <= 4)) and living = 1
-      [ cell-infect ]
-      [ ifelse infect-neighbors >= 5 and living = 2
-        [ cell-death ]
-        [ ifelse infect-neighbors <= 2 and living = 2
-          [ cell-normal ]
-          [ if normal-neighbors >= 5 and living = 3
-            [ cell-normal ] ] ] ] ]
+    [ set num-sick count neighbors with [status = 2] ]
+
+  ask patches
+    [ set num-dead count neighbors with [status = 3] ]
+
+  ask patches
+    [ ifelse num-sick = 2 or num-sick = 3 or num-sick = 4
+      [ if status != 3
+        [ cell-sick ]
+      ]
+      [ ifelse num-alive + num-sick > 5
+        [ cell-sick ]
+        [ ifelse num-sick mod 2 = 1 and status = 2
+          [ cell-dead ]
+          [ if num-alive mod 2 = 0 and status = 3
+              [ cell-alive ]
+          ]
+        ]
+      ]
+    ]
+
+;    [ ifelse num-sick = 2 or num-sick = 3 or num-sick = 4
+;      [ if status != 3
+;        [ cell-sick ]
+;      ]
+;      [ ifelse num-sick mod 2 = 1 and status = 2
+;        [ cell-dead ]
+;        [ if num-alive mod 2 = 0 and status = 3
+;            [ cell-alive ]
+;        ]
+;      ]
+;    ]
   tick
 end
 
 to draw-cells
-  let erasing [living] of patch mouse-xcor mouse-ycor
+  ; let erasing? [status] of patch mouse-xcor mouse-ycor
+  let erasing? true
   while [mouse-down?]
     [ ask patch mouse-xcor mouse-ycor
-      [ ifelse erasing = 1
-        [ cell-infect ]
-        [ ifelse erasing = 2
-          [ cell-death ]
-          [ cell-normal] ] ]
+      [ ifelse erasing?
+        [ cell-alive ]
+        [ cell-dead ] ]
       display ]
 end
 
 
 ; Copyright 1998 Uri Wilensky.
 ; See Info tab for full copyright and license.
-;Normal to infect:
-;  if 2 to 4 neighbor are infected
-;  then cell get infected
-;  elseif 6 or more neighbors
-;  then cell get infected
-;infect to death
-;  if odd number of neighbor are infected and cell already infected
-;  then cell dies
-;Reproduction
-;  if even number of normal neighbors
-;  then current dead cell will become living cell
 @#$#@#$#@
 GRAPHICS-WINDOW
 285
@@ -136,7 +126,7 @@ initial-density
 initial-density
 0.0
 100.0
-38.3
+25.5
 0.1
 1
 %
@@ -193,13 +183,30 @@ NIL
 NIL
 0
 
+BUTTON
+178
+276
+274
+309
+recolor
+ifelse status = 1\n  [ set pcolor green ]\n  [ ifelse status = 2\n    [ set pcolor yellow ]\n    [ set pcolor red ]\n  ]
+NIL
+1
+T
+PATCH
+NIL
+NIL
+NIL
+NIL
+0
+
 MONITOR
 12
 248
-115
+120
 293
-current density
-count patches with\n  [living = 1 or living = 2]\n/ count patches
+percent of alive
+count patches with\n  [status = 1]\n/ count patches
 2
 1
 11
@@ -232,10 +239,10 @@ When this button is down,\nyou can add or remove\ncells by holding down\nthe mou
 0
 
 BUTTON
-14
-142
-113
-180
+9
+134
+112
+169
 NIL
 draw-cells
 T
@@ -247,6 +254,39 @@ NIL
 NIL
 NIL
 1
+
+INPUTBOX
+119
+309
+274
+369
+alive
+55.0
+1
+0
+Color
+
+INPUTBOX
+119
+371
+274
+431
+sick
+45.0
+1
+0
+Color
+
+INPUTBOX
+119
+433
+274
+493
+dead
+15.0
+1
+0
+Color
 
 @#$#@#$#@
 ## WHAT IS IT?
