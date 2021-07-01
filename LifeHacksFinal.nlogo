@@ -3,6 +3,7 @@ patches-own [
   live-neighbors  ;; counts how many neighboring cells are alive
   normal-neighbors
   infect-neighbors
+  dead-neighbors
 ]
 
 to setup-blank
@@ -37,11 +38,12 @@ to cell-death
   set pcolor white
 end
 
-to go
+to go-geo
   ;; Normal to infect
   ask patches
     [ set normal-neighbors count neighbors with [living = 1]
-      set infect-neighbors count neighbors with [living = 2] ]
+      set infect-neighbors count neighbors with [living = 2]
+      set live-neighbors normal-neighbors + infect-neighbors ]
 
 
   ask patches
@@ -53,7 +55,6 @@ to go
           [ cell-normal ] ] ] ]
   tick
 end
-
 
 to go-anjelo
   ;; Normal to infect
@@ -77,6 +78,32 @@ to go-anjelo
   ask patches
     [ if live-neighbors mod 2 = 0 and living = 3
       [ cell-normal ] ]
+  tick
+end
+
+to go-gab
+  ask patches
+    [ set live-neighbors count neighbors with [living = 1] ]
+
+  ask patches
+    [ set infect-neighbors count neighbors with [living = 2] ]
+
+  ask patches
+    [ set dead-neighbors count neighbors with [living = 3] ]
+
+  ask patches
+    [ ifelse (infect-neighbors = 2 or infect-neighbors = 3 or infect-neighbors = 4) and living != 3
+      [ cell-infect ]
+      [ ifelse live-neighbors > 5
+        [ cell-infect ]
+        [ ifelse infect-neighbors mod 2 = 1 and living = 2
+          [ cell-death ]
+          [ if live-neighbors mod 2 = 0 and living = 3
+              [ cell-normal ]
+          ]
+        ]
+      ]
+    ]
   tick
 end
 
@@ -108,13 +135,13 @@ end
 ;  then current dead cell will become living cell
 @#$#@#$#@
 GRAPHICS-WINDOW
-558
-49
-1252
-744
+17
+18
+520
+522
 -1
 -1
-6.8
+4.901
 1
 10
 1
@@ -135,10 +162,10 @@ ticks
 15.0
 
 SLIDER
-120
-67
-276
-100
+654
+62
+810
+95
 initial-density
 initial-density
 0.0
@@ -150,10 +177,10 @@ initial-density
 HORIZONTAL
 
 BUTTON
-11
-68
-113
-101
+545
+63
+647
+96
 NIL
 setup-random
 NIL
@@ -167,13 +194,13 @@ NIL
 1
 
 BUTTON
-11
-204
-114
-242
-go-once
-go
+548
+227
+651
+265
 NIL
+go-anjelo
+T
 1
 T
 OBSERVER
@@ -184,12 +211,12 @@ NIL
 0
 
 BUTTON
-122
-204
-225
-242
-go-forever
-go
+549
+326
+652
+364
+NIL
+go-geo
 T
 1
 T
@@ -201,10 +228,10 @@ NIL
 0
 
 MONITOR
-12
-248
-115
-293
+545
+476
+648
+521
 current density
 count patches with\n  [living = 1 or living = 2]\n/ count patches
 2
@@ -212,10 +239,10 @@ count patches with\n  [living = 1 or living = 2]\n/ count patches
 11
 
 BUTTON
-11
-32
-113
-65
+545
+18
+647
+51
 NIL
 setup-blank
 NIL
@@ -229,20 +256,20 @@ NIL
 1
 
 TEXTBOX
-124
-125
-283
-193
+657
+103
+816
+171
 When this button is down,\nyou can add or remove\ncells by holding down\nthe mouse button\nand \"drawing\".
 11
 0.0
 0
 
 BUTTON
-14
-142
-113
-180
+547
+120
+646
+158
 NIL
 draw-cells
 T
@@ -256,12 +283,12 @@ NIL
 1
 
 BUTTON
-233
-204
-348
-244
-go-anjelo
-go-anjelo
+548
+276
+651
+314
+NIL
+go-gab
 T
 1
 T
@@ -270,7 +297,7 @@ NIL
 NIL
 NIL
 NIL
-1
+0
 
 @#$#@#$#@
 ## WHAT IS IT?
