@@ -14,4 +14,4 @@ Anjelo's added rules:
 
 Geo's added rules:
 1. If there are no (0) number of neighbors and cell is infected, then cell is dead.
-2. Modified Rule 4: If even number of neighbors are normal and cell is dead and neighbors exist (> 0), then cell is normal.
+2. Modified Rule 4: If even number of neighbors are normal, neighbors exist (!= 0), and cell is dead, then cell is normal.
